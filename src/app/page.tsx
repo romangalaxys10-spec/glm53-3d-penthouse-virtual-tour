@@ -6,6 +6,9 @@ import { Canvas } from '@react-three/fiber'
 import { ApartmentScene } from '@/components/virtual-tour/ApartmentScene'
 import { FirstPersonControls } from '@/components/virtual-tour/FirstPersonControls'
 import { TourUI } from '@/components/virtual-tour/TourUI'
+import { PerfMonitor } from '@/components/virtual-tour/PerfMonitor'
+import { CrosshairRaycaster, CrosshairDossierCard } from '@/components/virtual-tour/CrosshairDossiers'
+import { usePhotoMode } from '@/components/virtual-tour/PhotoMode'
 
 export default function Home() {
   const [isLocked, setIsLocked] = useState(false)
@@ -47,6 +50,20 @@ export default function Home() {
     return () => cancelAnimationFrame(raf)
   }, [])
 
+  // Photo mode (P key)
+  const [shotFlash, setShotFlash] = useState(false)
+  const takeShot = usePhotoMode(() => {
+    setShotFlash(true)
+    setTimeout(() => setShotFlash(false), 600)
+  })
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code === 'KeyP') takeShot()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [takeShot])
+
   // Throttle player position updates
   const handleMove = (pos: THREE.Vector3, dir: THREE.Vector3) => {
     const now = performance.now()
@@ -85,8 +102,13 @@ export default function Home() {
             onLockChange={setIsLocked}
             onMove={handleMove}
           />
+          <PerfMonitor quality={quality} onAutoDowngrade={() => setQuality('low')} />
+          <CrosshairRaycaster enabled={isLocked} />
         </Suspense>
       </Canvas>
+
+      {/* Crosshair furniture dossier card (DOM overlay) */}
+      <CrosshairDossierCard />
 
       {/* Loading overlay */}
       {!loaded && (

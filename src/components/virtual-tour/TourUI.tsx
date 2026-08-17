@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, Move, MousePointer2, Smartphone, Map, X, Info, Zap, Camera } from 'lucide-react'
+import { Eye, Move, MousePointer2, Smartphone, Map, X, Info, Zap, Camera, Sun, SunDim, MoonStar, Gauge } from 'lucide-react'
+import { setLightingPreset, getLightingPreset, type PresetName } from './LightingPresets'
+import { usePhotoMode } from './PhotoMode'
+import { getLiveFps, subscribeFps } from './PerfMonitor'
 
 interface TourUIProps {
   isLocked: boolean
@@ -63,6 +66,27 @@ export function TourUI({
   const [showIntro, setShowIntro] = useState(true)
   const [showControls, setShowControls] = useState(false)
   const [showMap, setShowMap] = useState(false)
+  const [preset, setPresetState] = useState<PresetName>('golden')
+  const [fps, setFps] = useState(60)
+  const [shotToast, setShotToast] = useState(false)
+  const takeShot = usePhotoMode(() => {
+    setShotToast(true)
+    setTimeout(() => setShotToast(false), 2200)
+  })
+
+  // live FPS counter
+  useEffect(() => {
+    const unsub = subscribeFps(setFps)
+    setFps(getLiveFps())
+    return unsub
+  }, [])
+
+  const cyclePreset = useCallback(() => {
+    const order: PresetName[] = ['golden', 'day', 'night']
+    const next = order[(order.indexOf(getLightingPreset()) + 1) % 3]
+    setLightingPreset(next)
+    setPresetState(next)
+  }, [])
 
   const handleStart = useCallback(() => {
     setShowIntro(false)
@@ -104,10 +128,12 @@ export function TourUI({
     const onKey = (e: KeyboardEvent) => {
       if (e.code === 'KeyM') setShowMap((s) => !s)
       if (e.code === 'KeyH') setControlsVisible((s) => !s)
+      if (e.code === 'KeyL') cyclePreset()
+      if (e.code === 'KeyP') takeShot()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [])
+  }, [cyclePreset, takeShot])
 
   return (
     <>
@@ -231,6 +257,8 @@ export function TourUI({
             >
               <span className="flex items-center gap-2"><KeyCap>W A S D</KeyCap> Move</span>
               <span className="flex items-center gap-2"><KeyCap>Shift</KeyCap> Sprint</span>
+            <span className="flex items-center gap-2"><KeyCap>L</KeyCap> Lighting</span>
+            <span className="flex items-center gap-2"><KeyCap>P</KeyCap> Photo</span>
               <span className="flex items-center gap-2"><KeyCap>M</KeyCap> Map</span>
               <span className="flex items-center gap-2"><KeyCap>Esc</KeyCap> Exit</span>
             </div>
@@ -284,6 +312,43 @@ export function TourUI({
           >
             <Zap size={14} /> {quality === 'high' ? 'High' : 'Low'}
           </button>
+          <button
+            onClick={cyclePreset}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-white transition-colors"
+            style={{
+              background: 'rgba(15,20,35,0.85)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+            title="Lighting preset (L)"
+          >
+            {preset === 'golden' ? <Sun size={14} /> : preset === 'day' ? <SunDim size={14} /> : <MoonStar size={14} />}
+            {' '}{preset === 'golden' ? 'Golden Hour' : preset === 'day' ? 'Daylight' : 'Midnight'}
+          </button>
+          <button
+            onClick={takeShot}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-white transition-colors"
+            style={{
+              background: 'rgba(15,20,35,0.85)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+            title="Photo mode (P)"
+          >
+            <Camera size={14} /> Photo
+          </button>
+          <div
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono"
+            style={{
+              background: 'rgba(15,20,35,0.85)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: fps >= 50 ? '#7dd97d' : fps >= 30 ? '#e8c468' : '#e88484',
+            }}
+            title="Measured FPS (auto-downgrades below 30)"
+          >
+            <Gauge size={14} /> {fps} FPS
+          </div>
           <button
             onClick={() => setShowIntro(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-white transition-colors"
@@ -349,6 +414,26 @@ export function TourUI({
           <div className="w-1.5 h-1.5 rounded-full bg-white/60" />
         </div>
       )}
+      {/* ====== PHOTO MODE TOAST ====== */}
+      <AnimatePresence>
+        {shotToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 pointer-events-none"
+          >
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full text-xs text-white"
+              style={{
+                background: 'rgba(15,20,35,0.9)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(212,168,84,0.35)',
+              }}>
+              <Camera size={13} /> Screenshot saved to your downloads
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

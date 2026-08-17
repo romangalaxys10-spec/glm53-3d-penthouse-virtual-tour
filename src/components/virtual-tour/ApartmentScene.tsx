@@ -5,6 +5,7 @@ import { Environment, Lightformer, ContactShadows } from '@react-three/drei'
 import { EffectComposer, Bloom, Vignette, ToneMapping, SMAA, BrightnessContrast } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
 import { RoomArchitecture, ROOM } from './Room'
+import { LightingPresets } from './LightingPresets'
 import {
   Sofa, Armchair, CoffeeTable, TVStand, KitchenIsland, DiningTable, Rug,
   Plant, FloorLamp, WallArt, PendantLight, Bookshelf, SideTable, Fireplace,
@@ -15,32 +16,8 @@ export function ApartmentScene() {
 
   return (
     <>
-      {/* ============== LIGHTING ============== */}
-      {/* Key: warm directional sun setting through the windows */}
-      <directionalLight
-        position={[8, 12, -6]}
-        intensity={5.5}
-        color="#ffd9a0"
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-bias={-0.0001}
-        shadow-camera-near={0.1}
-        shadow-camera-far={50}
-        shadow-camera-left={-15}
-        shadow-camera-right={15}
-        shadow-camera-top={15}
-        shadow-camera-bottom={-15}
-      />
-      {/* Fill: cool ambient from window side */}
-      <directionalLight
-        position={[-5, 8, -8]}
-        intensity={2.0}
-        color="#8fb4d8"
-      />
-      {/* Hemisphere ambient */}
-      <hemisphereLight args={['#dde8ff', '#7a6a5a', 1.6]} />
-      {/* Ambient base */}
-      <ambientLight intensity={0.8} />
+      {/* ============== LIGHTING (dynamic presets: golden / day / night) ============== */}
+      <LightingPresets />
 
       {/* ============== ENVIRONMENT (for reflections) ============== */}
       <Environment resolution={128} frames={1}>
