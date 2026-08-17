@@ -1,0 +1,6 @@
+{
+  "builds": [
+    { "src": "apps/glm53/package.json", "use": "@vercel/next", "region": "fra1" },
+    { "src": "apps/gemini37/package.json", "use": "@vercel/next", "region": "fra1" }
+  ]
+}
