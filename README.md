@@ -65,7 +65,7 @@ Per-furniture axis-aligned bounding boxes, checked linearly every frame against 
 Gemini 3.7 Flash rejected the linear scan. It bucketed all furniture into a hash grid of **1.2 m cells**, making collision lookups O(1) — check only the cell you're standing in. Press `G` in its edition to see the grid drawn live over the floor. At 13 colliders the difference is academic; at 10,000 colliders it's a rendering session vs. a slideshow. *That's the architectural judgment this repo exists to showcase.*
 
 ### 5. Lighting as a Narrative
-Three presets — `golden`, `day`, `night` — lerp sun position, color temperature, sky color, and lamp intensity together over ~1.5 s. The penthouse feels *staged*, not rendered.
+Three presets — `golden`, `day`, `night` — lerp sun position, color temperature, sky color, and lamp intensity together over ~1.2 s (smoothstep-eased). The penthouse feels *staged*, not rendered.
 
 ### 6. Performance as a Feature
 A live FPS meter watches frame times; when they dip, the renderer's pixel ratio steps down automatically. The tour stays smooth on integrated GPUs. (Verified on headless Chromium: zero console errors across all lighting presets.)
