@@ -150,6 +150,9 @@ The complete architectural breakdown — how GLM-5.3 planned the scene graph, ho
 
 **→ [Inside GLM-5.3: How an LLM Planned, Designed, and Executed a 3D Penthouse Virtual Tour](https://claw.rommark.dev/blog/62-inside-glm-5-3-building-a-3d-penthouse-virtual-tour.html)**
 
+Want the module-by-module wiring? Read **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.  
+Presenting to an audience? There is a script: **[docs/DEMO-GUIDE.md](docs/DEMO-GUIDE.md)**.
+
 ---
 
 ## 🙏 Credits & Context
